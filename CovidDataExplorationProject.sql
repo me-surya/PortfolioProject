@@ -3,9 +3,9 @@ from PortfolioProject.dbo.CovidDeaths
 where continent is not null
 order by 3,4
 
---select * 
---from PortfolioProject.dbo.CovidVaccinations 
---order by 3,4
+select * 
+from PortfolioProject.dbo.CovidVaccinations 
+order by 3,4
 
 --select Data that we are going to be using
 
@@ -36,6 +36,7 @@ group by Location, population
 order by Percentageofpopuinfected desc
 
 --showing countries with highest death count per population
+     
 select location, MAX(cast(total_deaths as int)) as highesttotaldeath
 --MAX((total_deaths/population)) as DeathCountPerPopulation
 from PortfolioProject.dbo.CovidDeaths
@@ -45,6 +46,7 @@ order by highesttotaldeath desc
 
 
 --LET`S BREAK THINGS DOWN BY CONTINENT
+     
 select location, MAX(cast(total_deaths as int)) as highesttotaldeath
 from PortfolioProject.dbo.CovidDeaths
 where continent is null
@@ -68,11 +70,24 @@ where continent is not null
 --group by date
 order by 1,2
 
---Looking at total population vs 
+--Looking at total population vs Vaccinations
+     
+select dea.continent, dea.location,dea.date, dea.population,
+vac.new_vaccinations, SUM(convert(int,vac.new_vaccinations ))
+OVER(partition by dea.location order by dea.location,dea.date) as RollingPeopleVaccinated
+--, (RollingpeopleVaccinated/population)*100
+from CovidDeaths dea
+join CovidVaccinations vac 
+     on dea.location = vac.location 
+     and dea.date = vac.date
+where dea.continent is not null
+--order by 2,3
+
+     
 --USE CTE
 
---with PopvsVac (Continent, location, date, Population,new_vaccinations,RollingpeopleVaccinated) as 
-
+with PopvsVac (Continent, location, date, Population,new_vaccinations,RollingpeopleVaccinated) as 
+(
 select dea.continent, dea.location,dea.date, dea.population,
 vac.new_vaccinations, SUM(convert(int,vac.new_vaccinations ))
 OVER(partition by dea.location order by dea.location,dea.date) as RollingPeopleVaccinated
@@ -118,6 +133,7 @@ select * , (RollingpeopleVaccinated/population)*100
 from #PercentPopulationVaccinated
 
 --creating view to store data for later visualizations
+     
 Create View Percentpopulationvaccinated as
 select dea.continent, dea.location,dea.date, dea.population,
 vac.new_vaccinations, SUM(convert(int,vac.new_vaccinations ))
